@@ -1,0 +1,12 @@
+{
+  "manifest_version": 2,
+  "name": "AB Repeat For YouTube",
+  "version": "0.0.1",
+  "description": "",
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/watch?v=*"],
+      "js": ["dist/watch.bundle.js"]
+    }
+ ]
+}
