@@ -5,6 +5,7 @@ module.exports = {
     watch: './src/content/watch',
   },
   mode: 'development',
+  devtool: 'cheap-module-source-map',
   module: {
     rules: [
       {
