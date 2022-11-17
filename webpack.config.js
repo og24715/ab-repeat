@@ -9,14 +9,23 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.(js|jsx)$/,
+        test: /\.(j|t)sx?$/,
         exclude: /node_modules/,
-        loader: "babel-loader",
-        options: { presets: ["@babel/preset-env", "@babel/preset-react"] },
+        loader: "ts-loader",
+      },
+      {
+        enforce: "pre",
+        test: /\.js$/,
+        exclude: /node_modules/,
+        loader: "source-map-loader",
       },
     ],
   },
-  resolve: { extensions: ["*", ".js", ".jsx"] },
+  externals: {
+    react: "React",
+    "react-dom": "ReactDOM",
+  },
+  resolve: { extensions: ["*", ".js", ".jsx", ".ts", ".tsx"] },
   output: {
     path: path.resolve(__dirname, "dist/"),
     filename: "[name].bundle.js",
