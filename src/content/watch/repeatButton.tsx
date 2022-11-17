@@ -1,13 +1,18 @@
-import React from 'react';
+import * as React from "react";
+import { Component } from "react";
 
-export default class RepeatButton extends React.Component {
+interface Props {
+  video: HTMLVideoElement
+}
+
+export default class RepeatButton extends Component<Props> {
   buttonTextDefinitionBySelectPartPhase = new Map([
     [0, 'A-B'],
     [1, 'A'],
     [2, 'B'],
     [3, 'X'],
   ]);
-  timerId = null;
+  timerId: number = 0;
   state = {
     aPart: 0,
     bPart: 0,
@@ -44,7 +49,7 @@ export default class RepeatButton extends React.Component {
   }
 
   _repeatVideo(duration) {
-    this.timerId = setTimeout(() => {
+    this.timerId = window.setTimeout(() => {
       this._skip2APart();
       this._repeatVideo(duration);
     }, duration);

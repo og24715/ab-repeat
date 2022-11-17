@@ -21,10 +21,6 @@ module.exports = {
       },
     ],
   },
-  externals: {
-    react: "React",
-    "react-dom": "ReactDOM",
-  },
   resolve: { extensions: ["*", ".js", ".jsx", ".ts", ".tsx"] },
   output: {
     path: path.resolve(__dirname, "dist/"),
