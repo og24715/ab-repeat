@@ -1,101 +1,97 @@
 import * as React from "react";
-import { Component } from "react";
+import { useRef, useReducer, useCallback, useEffect } from "react";
+import type { Reducer } from "react";
+
+import { Action, initialState, reducer, State } from "./reducer";
 
 interface Props {
-  video: HTMLVideoElement
+  video: HTMLVideoElement;
 }
 
-export default class RepeatButton extends Component<Props> {
-  buttonTextDefinitionBySelectPartPhase = new Map([
-    [0, 'A-B'],
-    [1, 'A'],
-    [2, 'B'],
-    [3, 'X'],
-  ]);
-  timerId: number = 0;
-  state = {
-    aPart: 0,
-    bPart: 0,
-    selectPartPhase: 0,
-  };
+const buttonTextDefinitionBySelectPartPhase = new Map([
+  [0, "A-B"],
+  [1, "A"],
+  [2, "B"],
+  [3, "X"],
+]);
 
-  _startSelectingPart() {
-    this.setState({
-      selectPartPhase: this.state.selectPartPhase + 1,
-      aPart: 0,
-      bPart: 0,
+export function RepeatButton(props: Props): JSX.Element {
+  const { video } = props;
+  const timerId = useRef(0);
+  const [{ aPart, bPart, selectPartPhase }, dispatch] = useReducer<
+    Reducer<
+      State,
+      | Action<"start">
+      | Action<"select-a-part", { time: number }>
+      | Action<"select-b-part", { time: number }>
+      | Action<"stop">
+    >
+  >(reducer, initialState);
+
+  const handleStartButtonClick = useCallback(() => {
+    dispatch({ type: "start", payload: undefined });
+  }, [dispatch]);
+
+  const handleAPartClick = useCallback(() => {
+    dispatch({
+      type: "select-a-part",
+      payload: { time: video.currentTime },
     });
-  }
+  }, [dispatch, video]);
 
-  _selectAPart() {
-    this.setState({
-      selectPartPhase: this.state.selectPartPhase + 1,
-      aPart: this.props.video.currentTime,
+  const handleBPartClick = useCallback(() => {
+    dispatch({ type: "select-b-part", payload: { time: video.currentTime } });
+  }, [dispatch, video]);
+
+  const handleClickStopButton = useCallback(() => {
+    dispatch({
+      type: "stop",
+      payload: undefined,
     });
-  }
+    clearTimeout(timerId.current);
+  }, [dispatch]);
 
-  _selectBPart() {
-    this.setState(
-      {
-        selectPartPhase: this.state.selectPartPhase + 1,
-        bPart: this.props.video.currentTime,
-      },
-      () => {
-        const duration = (this.state.bPart - this.state.aPart) * 1000;
-        this._skip2APart();
-        this._repeatVideo(duration);
-      },
-    );
-  }
+  useEffect(() => {
+    if (selectPartPhase === 3) {
+      const _skip2APart = () => {
+        video.currentTime = aPart;
+        video.play();
+      };
 
-  _repeatVideo(duration) {
-    this.timerId = window.setTimeout(() => {
-      this._skip2APart();
-      this._repeatVideo(duration);
-    }, duration);
-  }
-
-  _skip2APart() {
-    this.props.video.currentTime = this.state.aPart;
-    this.props.video.play();
-  }
-
-  _stopRepeat() {
-    clearTimeout(this.timerId);
-    this.setState({
-      selectPartPhase: 0,
-    });
-  }
-
-  _onClick = () => {
-    switch (this.state.selectPartPhase) {
-      case 0: // Start selecting A Part
-        this._startSelectingPart();
-        break;
-      case 1: // Start selecting B Part
-        this._selectAPart();
-        break;
-      case 2: // Repeat A-B!
-        this._selectBPart();
-        break;
-      case 3: // Cancel Repeat
-        this._stopRepeat();
-        break;
-      default:
+      const duration = (bPart - aPart) * 1000;
+      _skip2APart();
+      timerId.current = window.setInterval(() => {
+        _skip2APart();
+      }, duration);
     }
-  }
+  }, [selectPartPhase, bPart, aPart, video]);
 
-  _buttonText() {
-    return this.buttonTextDefinitionBySelectPartPhase.get(this.state.selectPartPhase);
-  }
+  const text = buttonTextDefinitionBySelectPartPhase.get(selectPartPhase);
 
-  render() {
-    return (
-      <button
-        onClick={this._onClick}
-      >
-        {this._buttonText()}
-      </button>
-    );
+  switch (selectPartPhase) {
+    case 0:
+      return (
+        <button type="button" onClick={handleStartButtonClick}>
+          {text}
+        </button>
+      );
+    case 1:
+      return (
+        <button type="button" onClick={handleAPartClick}>
+          {text}
+        </button>
+      );
+    case 2:
+      return (
+        <button type="button" onClick={handleBPartClick}>
+          {text}
+        </button>
+      );
+    case 3:
+      return (
+        <button type="button" onClick={handleClickStopButton}>
+          {text}
+        </button>
+      );
   }
 }
