@@ -1,24 +1,24 @@
-const path = require('path');
+const path = require("path");
 
 module.exports = {
   entry: {
-    watch: './src/content/watch',
+    watch: "./src/content/watch",
   },
-  mode: 'development',
-  devtool: 'cheap-module-source-map',
+  mode: "development",
+  devtool: "cheap-module-source-map",
   module: {
     rules: [
       {
         test: /\.(js|jsx)$/,
         exclude: /node_modules/,
-        loader: 'babel-loader',
-        options: { presets: ['env', 'stage-0', 'react'] },
+        loader: "babel-loader",
+        options: { presets: ["@babel/preset-env", "@babel/preset-react"] },
       },
     ],
   },
-  resolve: { extensions: ['*', '.js', '.jsx'] },
+  resolve: { extensions: ["*", ".js", ".jsx"] },
   output: {
-    path: path.resolve(__dirname, 'dist/'),
-    filename: '[name].bundle.js',
+    path: path.resolve(__dirname, "dist/"),
+    filename: "[name].bundle.js",
   },
 };
